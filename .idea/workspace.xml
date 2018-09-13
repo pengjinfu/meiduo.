@@ -63,6 +63,8 @@
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.intellij.database.dataSource.DataSourceTemplate" value="MySQL" />
+    <property name="database.console.LAST_STATE" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -98,7 +100,14 @@
       <option name="project" value="LOCAL" />
       <updated>1536830193158</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="在github创建了一个meido的仓库用于存储本次项目，所有项目将提交在本仓库。&#10;创建了一个function.txt说明文档，将记录开发过程。&#10;项目开始所需要的：&#10;0.在github创建一个仓库&#10;1.把远程仓库克隆到本地：git clone https://xxxx&#10;2.在pycharm中连接远程仓库&#10;3.为项目创建一个说明文档：记录开发过程&#10;4.开始开发&#10;4.1对项目进行分析&#10;4.2开始写代码&#10;5.使用说明">
+      <created>1536841207546</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1536841207546</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -112,10 +121,10 @@
       <window_info anchor="bottom" id="Python Console" order="7" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="right" id="Mongo Explorer" order="3" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.32952693" />
+      <window_info anchor="bottom" id="Terminal" order="7" weight="0.32952693" />
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24980111" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="right" id="Database" order="3" />
+      <window_info active="true" anchor="right" id="Database" order="3" visible="true" weight="0.3293556" />
       <window_info anchor="right" id="SciView" order="3" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
