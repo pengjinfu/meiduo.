@@ -142,7 +142,7 @@
             第二句：授权meiduo数据库下的所有表（meiduo.*）的所有权限（all）给用户meiduo在以任何ip访问数据库的时候（'meiduo'@'%'）
             第三句：刷新生效用户权限
 
-       5.在工程目录/meiduo_mall/apps目录下，创建一个应用users：
+       5.在工程目录/meiduo/apps目录下，创建一个应用users：
             cd meiduo/meiduo/apps
             django-admin startapp users
 
@@ -185,7 +185,7 @@
                     'PORT': 3306,  # 数据库端口
                     'USER': 'meiduo',  # 数据库用户名
                     'PASSWORD': 'meiduo',  # 数据库用户密码
-                    'NAME': 'meiduo_mall'  # 数据库名字
+                    'NAME': 'meiduo'  # 数据库名字
                 }
             }
             在使用数据库前，一定安装驱动：
@@ -299,7 +299,7 @@
         配置文件settings/dev.py 中添加
             REST_FRAMEWORK = {
                 # 异常处理
-                'EXCEPTION_HANDLER': 'meiduo_mall.utils.exceptions.exception_handler',
+                'EXCEPTION_HANDLER': 'meiduo.utils.exceptions.exception_handler',
             }
 
 
@@ -398,9 +398,229 @@
 
 
   2.2. 注册业务接口分析
+    创建好用户模型类后，我们开始来实现第一个业务逻辑——用户注册。
+
+    设计接口的思路
+        分析要实现的业务逻辑，明确在这个业务中需要涉及到几个相关子业务，将每个子业务当做一个接口来设计。
+
+    分析接口的功能任务，明确接口的访问方式与返回数据：
+        接口的请求方式，如GET 、POST 、PUT等
+        接口的URL路径定义
+        需要前端传递的数据及数据格式（如路径参数、查询字符串、请求体表单、JSON等）
+        返回给前端的数据及数据格式
+        特别强调：在前后端分离的应用模式中，我们作为后端开发人员设计后端接口时，可以不用考虑返回给前端数据后，前端如何处理，这是前端开发人
+    员的工作，我们只需明确我们要保存的或者要返回的是什么数据即可。
+
+    明确上述每一点后，即可开始编写接口。
+
+    注册业务接口分析
+        在用户注册中，需要实现以下接口：
+            短信验证码
+            用户名判断是否存在
+            手机号判断是否存在
+            注册保存用户数据
+
+        提示：
+            短信验证码考虑到后续可能会在其他业务中也用到，因此我们将验证码独立
+            创建一个新应用verifications，在此应用中实现短信验证码
+        注：新建应用verifications是因为在后面的第三方登录中还要使用，所以为达到重用效果。
+
+
   2.3. 短信验证码
+    1. 业务处理流程
+        生成和发送短信验证码
+        保存短信验证码
+        redis pipeline的使用
+        检查是否在60s内有发送记录
+        Celery异步发送短信
+    2. 后端接口设计：
+        2.1访问方式： GET /sms_codes/(?P<mobile>1[3-9]\d{9})/
+
+        2.2请求参数： 路径参数
+        参数      类型	  是否必须	  说明
+        mobile	  str	     是	     手机号
+
+        2.3返回数据： JSON
+        返回值	    类型	    是否必传	        说明
+        message	     str	   否	      OK，发送成功
+
+
+        2.4视图原型：
+
+        # url('^sms_codes/(?P<mobile>1[3-9]\d{9})/$', views.SMSCodeView.as_view()),
+        class SMSCodeView(APIView):
+            """
+            发送短信验证码
+            传入参数：
+                mobile, image_code_id, text
+            """
+            pass
+
+    3. 后端实现
+        在verifications/views.py中定义实现视图：
+        class SMSCodeView(APIView):
+            """发送短信验证码"""
+
+            def get(self, request, mobile):
+
+                # 创建连接到redis的对象
+                redis_conn = get_redis_connection('verify_codes')
+
+                # 60秒内不允许重发发送短信
+                send_flag = redis_conn.get('send_flag_%s' % mobile)
+                if send_flag:
+                    return Response({"message": "发送短信过于频繁"}, status=status.HTTP_400_BAD_REQUEST)
+
+                # 生成和发送短信验证码
+                sms_code = '%06d' % random.randint(0,999999)
+                logger.debug(sms_code)
+
+                CCP().send_template_sms(mobile,[sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60], constants.SEND_SMS_TEMPLATE_ID)
+
+                # 以下代码演示redis管道pipeline的使用
+                pl = redis_conn.pipeline()
+                pl.setex("sms_%s" % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
+                pl.setex('send_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, 1)
+                # 执行
+                pl.execute()
+
+                # 响应发送短信验证码结果
+                return Response({"message": "OK"})
+    4. 设置域名
+        4.1我们现在为前端和后端分别设置两个不同的域名
+        位置	            域名
+        前端	        www.meiduo.site
+        后端	        api.meiduo.site
+
+
+        4.2编辑/etc/hosts文件，可以设置本地域名
+            sudo vim /etc/hosts
+            在文件中增加两条信息
+            127.0.0.1   api.meiduo.site
+            127.0.0.1   www.meiduo.site
+
+        4.3windows系统中若设置本地域名，hosts文件在如下目录：
+            C:\Windows\System32\drivers\etc
+            我们在前端front_end_pc/js目录中，创建host.js文件用以为前端保存后端域名
+
+        4.4var host = 'http://api.meiduo.site:8000';
+            在所有需要访问后端接口的前端页面中都引入host.js，使用host变量即可指代后端域名。
+
+        修改settings配置中的ALLOWED_HOSTS
+            一旦不再使用127.0.0.1访问Django后端，需要在配置文件中修改ALLOWED_HOSTS，增加可以访问后端的域名
+
+            ALLOWED_HOSTS = ['api.meiduo.site', '127.0.0.1', 'localhost', 'www.meiduo.site']
+
+
   2.4. 跨域CORS
+    1.我们为前端和后端分别设置了两个不同的域名
+    位置	        域名
+    前端  	www.meiduo.site
+    后端	a   pi.meiduo.site
+
+    2.现在，前端与后端分处不同的域名，我们需要为后端添加跨域访问的支持。
+        我们使用CORS来解决后端对跨域访问的支持。
+        使用django-cors-headers扩展
+        参考文档https://github.com/ottoyiu/django-cors-headers/
+
+        2.1安装
+            pip install django-cors-headers
+
+    3.添加应用
+        INSTALLED_APPS = (
+            ...
+            'corsheaders',
+            ...
+        )
+    4.中间层设置
+        MIDDLEWARE = [
+            'corsheaders.middleware.CorsMiddleware',
+            ...
+        ]
+    5.添加白名单
+        # CORS
+        CORS_ORIGIN_WHITELIST = (
+            '127.0.0.1:8080',
+            'localhost:8080',
+            'www.meiduo.site:8080',
+            'api.meiduo.site:8000'
+        )
+        CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
+        凡是出现在白名单中的域名，都可以访问后端接口
+        CORS_ALLOW_CREDENTIALS 指明在跨域访问中，后端是否支持对cookie的操作。
+
   2.5. 使用Celery发送短信
+    celery使用
+    在meiduo/meidUo下创建celery_tasks用于保存celery异步任务。
+    在celery_tasks目录下创建config.py文件，用于保存celery的配置信息
+        broker_url = "redis://127.0.0.1/14"
+
+    在celery_tasks目录下创建main.py文件，用于作为celery的启动文件
+
+        from celery import Celery
+
+        # 为celery使用django配置文件进行设置
+        import os
+        if not os.getenv('DJANGO_SETTINGS_MODULE'):
+            os.environ['DJANGO_SETTINGS_MODULE'] = 'meidUo.settings.dev'
+
+        # 创建celery应用
+        app = Celery('meiduo')
+
+        # 导入celery配置
+        app.config_from_object('celery_tasks.config')
+
+        # 自动注册celery任务
+        app.autodiscover_tasks(['celery_tasks.sms'])
+
+
+    在celery_tasks目录下创建sms目录，用于放置发送短信的异步任务相关代码。
+    将提供的发送短信的云通讯SDK放到celery_tasks/sms/目录下。
+    在celery_tasks/sms/目录下创建tasks.py文件，用于保存发送短信的异步任务
+
+        import logging
+
+        from celery_tasks.main import app
+        from .yuntongxun.sms import CCP
+
+        logger = logging.getLogger("django")
+
+        # 验证码短信模板
+        SMS_CODE_TEMP_ID = 1
+
+        @app.task(name='send_sms_code')
+        def send_sms_code(mobile, code, expires):
+            """
+            发送短信验证码
+            :param mobile: 手机号
+            :param code: 验证码
+            :param expires: 有效期
+            :return: None
+            """
+
+            try:
+                ccp = CCP()
+                result = ccp.send_template_sms(mobile, [code, expires], SMS_CODE_TEMP_ID)
+            except Exception as e:
+                logger.error("发送验证码短信[异常][ mobile: %s, message: %s ]" % (mobile, e))
+            else:
+                if result == 0:
+                    logger.info("发送验证码短信[正常][ mobile: %s ]" % mobile)
+                else:
+                    logger.warning("发送验证码短信[失败][ mobile: %s ]" % mobile)
+        在verifications/views.py中改写SMSCodeView视图，使用celery异步任务发送短信
+
+        from celery_tasks.sms import tasks as sms_tasks
+
+        class SMSCodeView(GenericAPIView):
+            ...
+                # 发送短信验证码
+                sms_code_expires = str(constants.SMS_CODE_REDIS_EXPIRES // 60)
+                sms_tasks.send_sms_code.delay(mobile, sms_code, sms_code_expires)
+
+                return Response({"message": "OK"})
+
+
   2.6. 判断帐号是否存在
   2.7. 注册
   2.8. JWT

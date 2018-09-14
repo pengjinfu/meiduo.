@@ -46,8 +46,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users.apps.UsersConfig',
-    'rest_framework'
+    # 这一定要放在下面两个子应用之前，不然会报错
+    'rest_framework',
+    'meido.apps.users.apps.UsersConfig',
+    'meido.apps.verifications.apps.VerificationsConfig',
 ]
 
 MIDDLEWARE = [
@@ -106,6 +108,13 @@ CACHES = {
     "session": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/1",   # 生产改为本地
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "verify_codes": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/2",  # 生产改为本地
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -203,6 +212,6 @@ LOGGING = {
 
 REST_FRAMEWORK = {
     # 异常处理
-    'EXCEPTION_HANDLER': 'meiduo_mall.utils.exceptions.exception_handler',
+    'EXCEPTION_HANDLER': 'meido.utils.exceptions.exception_handler',
 }
 AUTH_USER_MODEL = 'users.User'
