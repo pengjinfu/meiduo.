@@ -189,30 +189,74 @@
                 import pymysql
                 pymysql.install_as_MySQLdb()
        9.配置redis
-       CACHES = {
-            "default": {
-                "BACKEND": "django_redis.cache.RedisCache",
-                "LOCATION": "redis://10.211.55.5:6379/0",
-                "OPTIONS": {
-                    "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                }
-            },
-            "session": {
-                "BACKEND": "django_redis.cache.RedisCache",
-                "LOCATION": "redis://10.211.55.5:6379/1",
-                "OPTIONS": {
-                    "CLIENT_CLASS": "django_redis.client.DefaultClient",
+           CACHES = {
+                "default": {
+                    "BACKEND": "django_redis.cache.RedisCache",
+                    "LOCATION": "redis://10.211.55.5:6379/0",
+                    "OPTIONS": {
+                        "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                    }
+                },
+                "session": {
+                    "BACKEND": "django_redis.cache.RedisCache",
+                    "LOCATION": "redis://10.211.55.5:6379/1",
+                    "OPTIONS": {
+                        "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                    }
                 }
             }
-        }
-        SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-        SESSION_CACHE_ALIAS = "session"
-        除了名为default的redis配置外，还补充了名为session的redis配置，分别使用两个不同的redis库。
+            SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+            SESSION_CACHE_ALIAS = "session"
+            除了名为default的redis配置外，还补充了名为session的redis配置，分别使用两个不同的redis库。
 
-        同时修改了Django的Session机制使用redis保存，且使用名为'session'的redis配置。
+            同时修改了Django的Session机制使用redis保存，且使用名为'session'的redis配置。
 
-        此处修改Django的Session机制存储主要是为了给Admin站点使用。
+            此处修改Django的Session机制存储主要是为了给Admin站点使用。
+       10.  本地化语言与时区
+            LANGUAGE_CODE = 'zh-hans'
+            TIME_ZONE = 'Asia/Shanghai'
 
+       11.配置日志
+            LOGGING = {
+                'version': 1,
+                'disable_existing_loggers': False,  # 是否禁用已经存在的日志器
+                'formatters': {  # 日志信息显示的格式
+                    'verbose': {
+                        'format': '%(levelname)s %(asctime)s %(module)s %(lineno)d %(message)s'
+                    },
+                    'simple': {
+                        'format': '%(levelname)s %(module)s %(lineno)d %(message)s'
+                    },
+                },
+                'filters': {  # 对日志进行过滤
+                    'require_debug_true': {  # django在debug模式下才输出日志
+                        '()': 'django.utils.log.RequireDebugTrue',
+                    },
+                },
+                'handlers': {  # 日志处理方法
+                    'console': {  # 向终端中输出日志
+                        'level': 'INFO',
+                        'filters': ['require_debug_true'],
+                        'class': 'logging.StreamHandler',
+                        'formatter': 'simple'
+                    },
+                    'file': {  # 向文件中输出日志
+                        'level': 'INFO',
+                        'class': 'logging.handlers.RotatingFileHandler',
+                        'filename': os.path.join(os.path.dirname(BASE_DIR), "logs/meiduo.log"),  # 日志文件的位置
+                        'maxBytes': 300 * 1024 * 1024,
+                        'backupCount': 10,
+                        'formatter': 'verbose'
+                    },
+                },
+                'loggers': {  # 日志器
+                    'django': {  # 定义了一个名为django的日志器
+                        'handlers': ['console', 'file'],  # 可以同时向终端与文件中输出日志
+                        'propagate': True,  # 是否继续传递日志信息
+                        'level': 'INFO',  # 日志器接收的最低日志级别
+                    },
+                }
+            }
 2. 用户部分
   2.1. 用户模型类
   2.2. 注册业务接口分析
