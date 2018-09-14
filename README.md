@@ -386,16 +386,17 @@
 
         我们自定义的用户模型类还不能直接被Django的认证系统所识别，需要在配置文件中告知Django认证系统使用我们自定义的模型类。
 
-        在配置文件中进行设置
-        AUTH_USER_MODEL = 'users.User'
-        AUTH_USER_MODEL 参数的设置以点.来分隔，表示应用名.模型类名。
+        配置文件settings/dev.py 中添加
+            AUTH_USER_MODEL = 'users.User'
+            AUTH_USER_MODEL 参数的设置以点.来分隔，表示应用名.模型类名。
 
-        注意：Django建议我们对于AUTH_USER_MODEL参数的设置一定要在第一次数据库迁移之前就设置好，否则后续使用可能出现未知错误。
+        注意（重要）：Django建议我们对于AUTH_USER_MODEL参数的设置一定要在第一次数据库迁移之前就设置好，否则后续使用可能出现未知错误。
 
-        执行数据库迁移
+        执行数据库迁移:在终端中输入以下命令：/meiduo./meiduo$
+            python manage.py makemigrations
+            python manage.py migrate
 
-        python manage.py makemigrations
-        python manage.py migrate
+
   2.2. 注册业务接口分析
   2.3. 短信验证码
   2.4. 跨域CORS
