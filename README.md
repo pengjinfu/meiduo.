@@ -173,7 +173,7 @@
                 ...
                 'rest_framework',
             ]
-        8.配置数据库
+       8.配置数据库
             DATABASES = {
                 'default': {
                     'ENGINE': 'django.db.backends.mysql',
@@ -184,6 +184,34 @@
                     'NAME': 'meiduo_mall'  # 数据库名字
                 }
             }
+            在使用数据库前，一定安装驱动：
+            meiduo/meiduo/__init__.py文件中添加
+                import pymysql
+                pymysql.install_as_MySQLdb()
+       9.配置redis
+       CACHES = {
+            "default": {
+                "BACKEND": "django_redis.cache.RedisCache",
+                "LOCATION": "redis://10.211.55.5:6379/0",
+                "OPTIONS": {
+                    "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                }
+            },
+            "session": {
+                "BACKEND": "django_redis.cache.RedisCache",
+                "LOCATION": "redis://10.211.55.5:6379/1",
+                "OPTIONS": {
+                    "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                }
+            }
+        }
+        SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+        SESSION_CACHE_ALIAS = "session"
+        除了名为default的redis配置外，还补充了名为session的redis配置，分别使用两个不同的redis库。
+
+        同时修改了Django的Session机制使用redis保存，且使用名为'session'的redis配置。
+
+        此处修改Django的Session机制存储主要是为了给Admin站点使用。
 
 2. 用户部分
   2.1. 用户模型类
