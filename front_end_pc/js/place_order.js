@@ -92,7 +92,7 @@ var vm = new Vue({
                     })
                     .catch(error => {
                         this.order_submitting = false;
-                        alert(error.response.data[0]);
+                        alert(error.response.data.detail);
                     })
             }
         }

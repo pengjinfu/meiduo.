@@ -40,6 +40,7 @@ var vm = new Vue({
             .catch(error => {
                 alert(error.response.data);
             });
+        // 请求用户的地址数据
         axios.get(this.host + '/addresses/', {
                 headers: {
                     'Authorization': 'JWT ' + this.token
@@ -67,7 +68,7 @@ var vm = new Vue({
                         responseType: 'json'
                     })
                     .then(response => {
-                        this.cities = response.data.subs;
+                        this.cities = response.data;
                     })
                     .catch(error => {
                         console.log(error.response.data);
@@ -81,7 +82,7 @@ var vm = new Vue({
                         responseType: 'json'
                     })
                     .then(response => {
-                        this.districts = response.data.subs;
+                        this.districts = response.data;
                     })
                     .catch(error => {
                         console.log(error.response.data);
@@ -264,4 +265,4 @@ var vm = new Vue({
             this.is_set_title = [];
         }
     }
-});
+})

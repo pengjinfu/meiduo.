@@ -39,7 +39,6 @@ var vm = new Vue({
             }
             return null;
         },
-         // 去支付
         next_operate: function(){
             if (this.pay_method == 1) {
                 location.href = '/index.html';
@@ -52,12 +51,12 @@ var vm = new Vue({
                         responseType: 'json'
                     })
                     .then(response => {
-                        // 跳转到支付宝支付
                         location.href = response.data.alipay_url;
                     })
                     .catch(error => {
                         console.log(error.response.data);
                     })
+
             }
         }
     }

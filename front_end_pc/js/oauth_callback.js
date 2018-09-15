@@ -12,8 +12,6 @@ var vm = new Vue({
         error_phone_message: '',
         error_sms_code_message: '',
 
-        image_code_id: '', // 图片验证码id
-        image_code_url: '',
 
         sms_code_tip: '获取短信验证码',
         sending_flag: false, // 正在发送短信标志
@@ -39,12 +37,13 @@ var vm = new Vue({
                     localStorage.user_id = response.data.user_id;
                     localStorage.username = response.data.username;
                     localStorage.token = response.data.token;
+
+                    // 从路径中取出state,引导用户进入登录成功之后的页面
                     var state = this.get_query_string('state');
                     location.href = state;
                 } else {
                     // 用户未绑定
                     this.access_token = response.data.access_token;
-                    this.generate_image_code();
                     this.is_show_waiting = false;
                 }
             })
@@ -52,7 +51,6 @@ var vm = new Vue({
                 console.log(error.response.data);
                 alert('服务器异常');
             })
-
     },
     methods: {
         // 获取url路径参数
@@ -63,28 +61,6 @@ var vm = new Vue({
                 return decodeURI(r[2]);
             }
             return null;
-        },
-        // 生成uuid
-        generate_uuid: function(){
-            var d = new Date().getTime();
-            if(window.performance && typeof window.performance.now === "function"){
-                d += performance.now(); //use high-precision timer if available
-            }
-            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                var r = (d + Math.random()*16)%16 | 0;
-                d = Math.floor(d/16);
-                return (c =='x' ? r : (r&0x3|0x8)).toString(16);
-            });
-            return uuid;
-        },
-        // 生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
-        generate_image_code: function(){
-            // 生成一个编号
-            // 严格一点的使用uuid保证编号唯一， 不是很严谨的情况下，也可以使用时间戳
-            this.image_code_id = this.generate_uuid();
-
-            // 设置页面中图片验证码img标签的src属性
-            this.image_code_url = this.host + "/image_codes/" + this.image_code_id + "/";
         },
         check_pwd: function (){
             var len = this.password.length;
@@ -128,7 +104,6 @@ var vm = new Vue({
 
             // 校验参数，保证输入框有数据填写
             this.check_phone();
-            this.check_image_code();
 
             if (this.error_phone == true || this.error_image_code == true) {
                 this.sending_flag = false;
@@ -136,7 +111,7 @@ var vm = new Vue({
             }
 
             // 向后端接口发送请求，让后端发送短信验证码
-            axios.get(this.host + '/sms_codes/' + this.mobile + '/?text=' + this.image_code+'&image_code_id='+ this.image_code_id, {
+            axios.get(this.host + '/sms_codes/' + this.mobile + '/', {
                     responseType: 'json'
                 })
                 .then(response => {
@@ -161,7 +136,6 @@ var vm = new Vue({
                 })
                 .catch(error => {
                     if (error.response.status == 400) {
-                        this.error_image_code_message = '图片验证码有误';
                         this.error_image_code = true;
                     } else {
                         console.log(error.response.data);
@@ -170,21 +144,21 @@ var vm = new Vue({
                 })
         },
         // 保存
-        on_submit: function(){
+        on_submit: function () {
             this.check_pwd();
             this.check_phone();
             this.check_sms_code();
 
-            if(this.error_password == false && this.error_phone == false && this.error_sms_code == false) {
+            if (this.error_password == false && this.error_phone == false && this.error_sms_code == false) {
                 axios.post(this.host + '/oauth/qq/user/', {
-                        password: this.password,
-                        mobile: this.mobile,
-                        sms_code: this.sms_code,
-                        access_token: this.access_token
-                    }, {
-                        responseType: 'json',
-                        withCredentials: true
-                    })
+                    password: this.password,
+                    mobile: this.mobile,
+                    sms_code: this.sms_code,
+                    access_token: this.access_token
+                }, {
+                    responseType: 'json',
+                    withCredentials: true
+                })
                     .then(response => {
                         // 记录用户登录状态
                         sessionStorage.clear();
@@ -194,7 +168,7 @@ var vm = new Vue({
                         localStorage.username = response.data.username;
                         location.href = this.get_query_string('state');
                     })
-                    .catch(error=> {
+                    .catch(error => {
                         if (error.response.status == 400) {
                             this.error_sms_code_message = error.response.data.message;
                             this.error_sms_code = true;
@@ -203,7 +177,6 @@ var vm = new Vue({
                         }
                     })
             }
-
         }
     }
 });

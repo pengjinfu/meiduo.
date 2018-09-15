@@ -44,6 +44,7 @@ var vm = new Vue({
                                 this.histories[i].url = '/goods/' + this.histories[i].id + '.html';
                             }
                         })
+
                 })
                 .catch(error => {
                     if (error.response.status==401 || error.response.status==403) {
@@ -63,14 +64,14 @@ var vm = new Vue({
         },
         // 保存email
         save_email: function(){
-            var re = /^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$/;
+            var re = /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/;
             if(re.test(this.email)) {
                 this.email_error = false;
             } else {
                 this.email_error = true;
                 return;
             }
-            axios.put(this.host + '/email/',
+            axios.put(this.host + '/emails/',
                 { email: this.email },
                 {
                     headers: {

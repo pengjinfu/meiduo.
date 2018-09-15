@@ -73,6 +73,7 @@ var vm = new Vue({
                 this.update_count(index, count);
             }
         },
+        // 增加操作
         on_add: function(index){
             var count = this.cart[index].count + 1;
             this.update_count(index, count);
@@ -117,6 +118,7 @@ var vm = new Vue({
                     console.log(error.response.data);
                 })
         },
+        // 数量输入框输入操作
         on_input: function(index){
             var val = parseInt(this.cart[index].count);
             if (isNaN(val) || val <= 0) {
@@ -144,6 +146,7 @@ var vm = new Vue({
                             alert('修改购物车失败');
                         }
                         console.log(error.response.data);
+                        ;
                         this.cart[index].count = this.origin_input;
                     })
             }

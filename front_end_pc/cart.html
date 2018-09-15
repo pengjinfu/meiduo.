@@ -10,7 +10,7 @@
     <script type="text/javascript" src="js/axios-0.18.0.min.js"></script>
 </head>
 <body>
-    <div id="app">
+<div id="app">
     <div class="header_con">
         <div class="header">
             <div class="welcome fl">欢迎来到美多商城!</div>
@@ -46,7 +46,7 @@
         </form>
     </div>
 
-    <div class="total_count">全部商品<em>{{total_count}}</em>件</div>
+    <div class="total_count">全部商品<em>{{ total_count }}</em>件</div>
     <ul class="cart_list_th clearfix">
         <li class="col01">商品名称</li>
         <li class="col03">商品价格</li>
@@ -62,18 +62,21 @@
         <li class="col06">
             <div class="num_add">
                 <a @click="on_add(index)" class="add fl">+</a>
-                <input v-model="sku.count" @focus="origin_input=sku.count" @blur="on_input(index)" type="text" class="num_show fl">
+                <input v-model="sku.count" @focus="origin_input=sku.count" @blur="on_input(index)" type="text"
+                       class="num_show fl">
                 <a @click="on_minus(index)" class="minus fl">-</a>
             </div>
         </li>
-        <li class="col07">{{sku.amount}}元</li>
+        <li class="col07">{{ sku.amount }}元</li>
         <li class="col08"><a @click="on_delete(index)">删除</a></li>
     </ul>
 
     <ul class="settlements">
         <li class="col01"><input type="checkbox" name="" @change="on_selected_all" v-model="selected_all"></li>
         <li class="col02">全选</li>
-        <li class="col03">合计(不含运费)：<span>¥</span><em>{{total_selected_amount}}</em><br>共计<b>{{total_selected_count}}</b>件商品</li>
+        <li class="col03">
+            合计(不含运费)：<span>¥</span><em>{{ total_selected_amount }}</em><br>共计<b>{{ total_selected_count }}</b>件商品
+        </li>
         <li class="col04"><a href="place_order.html">去结算</a></li>
     </ul>
 
@@ -88,9 +91,9 @@
             <a href="#">友情链接</a>
         </div>
         <p>CopyRight © 2016 北京美多商业股份有限公司 All Rights Reserved</p>
-        <p>电话：010-****888    京ICP备*******8号</p>
+        <p>电话：010-****888 京ICP备*******8号</p>
     </div>
-    </div>
-    <script type="text/javascript" src="/js/cart.js"></script>
+</div>
+<script type="text/javascript" src="/js/cart.js"></script>
 </body>
 </html>
