@@ -1,7 +1,3 @@
-#!/usr/bin/python3
-# -*- coding:utf-8 -*-
-# Author:Dreamer
-# Time:2018.9.1
 """
 Django settings for meido project.
 
@@ -13,31 +9,30 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-
+import datetime
 import os
-
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print(BASE_DIR)
-# 添加导包路径
-import sys
 
-sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'd!ud1ur!!tr@iz28gb2!muwtj0pas@hk(-6*tp^+)m1slkv9*^'
+SECRET_KEY = 'rh+gppi3n7@%l__9v-@cjc8565yx$!il2jl7urpz5*3j#2vww3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['api.meido.site','www.meiudo.site','127.0.0.1']
 
 
+print(BASE_DIR)
 # Application definition
+import sys
+print(sys.path)
+sys.path.insert(0,os.path.join(BASE_DIR,'apps'))
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -46,13 +41,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 这一定要放在下面两个子应用之前，不然会报错
     'rest_framework',
-    'meido.apps.users.apps.UsersConfig',
-    'meido.apps.verifications.apps.VerificationsConfig',
+    'corsheaders',
+
+    'users.apps.UsersConfig',
+    'verifications.apps.VerificationsConfig',
+    'oauth.apps.OauthConfig',
+
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -89,44 +88,14 @@ WSGI_APPLICATION = 'meido.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '127.0.0.1',  # 数据库主机
-        'PORT': 3306,  # 数据库端口
-        'USER': 'meiduo',  # 数据库用户名
-        'PASSWORD': 'meiduo',  # 数据库用户密码
-        'NAME': 'meiduo'  # 数据库名字
+        'NAME': 'meiduo',
+        'USER':'meiduo',
+        'PASSWORD':'meiduo',
+        'HOST':'127.0.0.1',
+        'PORT':3306
     }
 }
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/0", # 生产改为本地
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    },
-    "session": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",   # 生产改为本地
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    },
-    "verify_codes": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/2",  # 生产改为本地
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    }
-}
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "session"
-# 除了名为default的redis配置外，还补充了名为session的redis配置，分别使用两个不同的redis库。
-# 
-# 同时修改了Django的Session机制使用redis保存，且使用名为'session'的redis配置。
-# 
-# 此处修改Django的Session机制存储主要是为了给Admin站点使用。
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -150,10 +119,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-# LANGUAGE_CODE = 'en-us'
 LANGUAGE_CODE = 'zh-hans'
 
-# TIME_ZONE = 'UTC'
 TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
@@ -167,6 +134,34 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "session": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "verify": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+
+}
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "session"
 
 
 LOGGING = {
@@ -195,7 +190,7 @@ LOGGING = {
         'file': {  # 向文件中输出日志
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(os.path.dirname(BASE_DIR), "logs/meiduo.log"),  # 日志文件的位置
+            'filename': os.path.join(os.path.dirname(BASE_DIR), "logs/meido.log"),  # 日志文件的位置
             'maxBytes': 300 * 1024 * 1024,
             'backupCount': 10,
             'formatter': 'verbose'
@@ -213,5 +208,36 @@ LOGGING = {
 REST_FRAMEWORK = {
     # 异常处理
     'EXCEPTION_HANDLER': 'meido.utils.exceptions.exception_handler',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
 }
-AUTH_USER_MODEL = 'users.User'
+
+AUTH_USER_MODEL='users.User'
+
+CORS_ORIGIN_WHITELIST = (
+    '127.0.0.1:8080',
+    'localhost:8080',
+    'www.meido.site:8080',
+    'api.meido.site:8000'
+)
+
+CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
+
+
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),# jwt 有效期配置
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'users.utils.jwt_response_payload_handler',# 返回结果配置
+}
+
+# 后端认证方法配置
+AUTHENTICATION_BACKENDS = [
+    'users.utils.UsernameMobileAuthBackend',
+]
+
+# QQ登录参数
+QQ_CLIENT_ID = '101474184'  # appid
+QQ_CLIENT_SECRET = 'c6ce949e04e12ecc909ae6a8b09b637c' # appkey
+QQ_REDIRECT_URI = 'http://www.meido.site:8080/oauth_callback.html' # 跳转url

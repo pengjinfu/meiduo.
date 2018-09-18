@@ -1,4 +1,3 @@
- meiduo.
 美多商城项目：
 1. 项目准备
   1.1. 商业模式
@@ -82,8 +81,8 @@
       1.3克隆项目到本地
       git clone https://xxx
       ----------------------------------------------------------------------------------------
-      前端人员和后端人员同时对应各自部分开发。这里假设前端部分已经先完成。当我们在写代码时基本上没有前端，我们要学会调试，get方法用瀏覽器即可，其它方法用
-      postman工具进行请求。学会调试是非常重要的！！！。
+      前端人员和后端人员同时对应各自部分开发。这里假设前端部分已经先完成。当我们在写代码时基本上没有前端，我们要学会调试，get方法用瀏覽器即可，
+      其它方法用postman工具进行请求。学会调试是非常重要的！！！。
 
   2.把前端文件添加到项目中
       2.1 添加文件
@@ -140,6 +139,7 @@
             create user meiduo identified by 'meiduo';
             grant all on meiduo.* to 'meiduo'@'%';
             flush privileges;
+            
             说明：
             第一句：创建用户账号 meiduo, 密码 meiduo (由identified by 指明)
             第二句：授权meiduo数据库下的所有表（meiduo.*）的所有权限（all）给用户meiduo在以任何ip访问数据库的时候（'meiduo'@'%'）
@@ -168,10 +168,10 @@
 
             代码：
 
-             Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+            # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
             BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-             添加导包路径
+            # 添加导包路径
             import sys
             sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
@@ -184,15 +184,15 @@
             DATABASES = {
                 'default': {
                     'ENGINE': 'django.db.backends.mysql',
-                    'HOST': '127.0.0.1',   数据库主机
-                    'PORT': 3306,   数据库端口
-                    'USER': 'meiduo',   数据库用户名
-                    'PASSWORD': 'meiduo',   数据库用户密码
-                    'NAME': 'meiduo'   数据库名字
+                    'HOST': '127.0.0.1',   # 数据库主机
+                    'PORT': 3306,   # 数据库端口
+                    'USER': 'meiduo',   # 数据库用户名
+                    'PASSWORD': 'meiduo',   # 数据库用户密码
+                    'NAME': 'meiduo'   # 数据库名字
                 }
             }
             在使用数据库前，一定安装驱动：
-            meiduo/meiduo/__init__.py文件中添加
+            在meiduo/meiduo/__init__.py文件中添加以下代码:
                 import pymysql
                 pymysql.install_as_MySQLdb()
 
@@ -216,9 +216,7 @@
             SESSION_ENGINE = "django.contrib.sessions.backends.cache"
             SESSION_CACHE_ALIAS = "session"
             除了名为default的redis配置外，还补充了名为session的redis配置，分别使用两个不同的redis库。
-
             同时修改了Django的Session机制使用redis保存，且使用名为'session'的redis配置。
-
             此处修改Django的Session机制存储主要是为了给Admin站点使用。
 
        10.  本地化语言与时区
@@ -228,7 +226,7 @@
        11.配置日志：并在根容器下创建logs文件
             LOGGING = {
                 'version': 1,
-                'disable_existing_loggers': False,   是否禁用已经存在的日志器
+                'disable_existing_loggers': False,   # 是否禁用已经存在的日志器
                 'formatters': {   日志信息显示的格式
                     'verbose': {
                         'format': '%(levelname)s %(asctime)s %(module)s %(lineno)d %(message)s'
@@ -237,32 +235,32 @@
                         'format': '%(levelname)s %(module)s %(lineno)d %(message)s'
                     },
                 },
-                'filters': {   对日志进行过滤
-                    'require_debug_true': {   django在debug模式下才输出日志
+                'filters': {   # 对日志进行过滤
+                    'require_debug_true': {   # django在debug模式下才输出日志
                         '()': 'django.utils.log.RequireDebugTrue',
                     },
                 },
-                'handlers': {   日志处理方法
-                    'console': {   向终端中输出日志
+                'handlers': {   # 日志处理方法
+                    'console': {   # 向终端中输出日志
                         'level': 'INFO',
                         'filters': ['require_debug_true'],
                         'class': 'logging.StreamHandler',
                         'formatter': 'simple'
                     },
-                    'file': {   向文件中输出日志
+                    'file': {   # 向文件中输出日志
                         'level': 'INFO',
                         'class': 'logging.handlers.RotatingFileHandler',
-                        'filename': os.path.join(os.path.dirname(BASE_DIR), "logs/meiduo.log"),   日志文件的位置
+                        'filename': os.path.join(os.path.dirname(BASE_DIR), "logs/meiduo.log"),   # 日志文件的位置
                         'maxBytes': 300 * 1024 * 1024,
                         'backupCount': 10,
                         'formatter': 'verbose'
                     },
                 },
-                'loggers': {   日志器
-                    'django': {   定义了一个名为django的日志器
-                        'handlers': ['console', 'file'],   可以同时向终端与文件中输出日志
-                        'propagate': True,   是否继续传递日志信息
-                        'level': 'INFO',   日志器接收的最低日志级别
+                'loggers': {   # 日志器
+                    'django': {   # 定义了一个名为django的日志器
+                        'handlers': ['console', 'file'],   # 可以同时向终端与文件中输出日志
+                        'propagate': True,   # 是否继续传递日志信息
+                        'level': 'INFO',   # 日志器接收的最低日志级别
                     },
                 }
             }
@@ -278,7 +276,7 @@
         from rest_framework.response import Response
         from rest_framework import status
 
-         获取在配置文件中定义的logger，用来记录日志
+        # 获取在配置文件中定义的logger，用来记录日志
         logger = logging.getLogger('django')
 
         def exception_handler(exc, context):
@@ -294,14 +292,15 @@
             if response is None:
                 view = context['view']
                 if isinstance(exc, DatabaseError) or isinstance(exc, RedisError):
-                     数据库异常
+                    # 数据库异常
                     logger.error('[%s] %s' % (view, exc))
                     response = Response({'message': '服务器内部错误'}, status=status.HTTP_507_INSUFFICIENT_STORAGE)
 
             return response
+
         配置文件settings/dev.py 中添加
             REST_FRAMEWORK = {
-                 异常处理
+                 # 异常处理
                 'EXCEPTION_HANDLER': 'meiduo.utils.exceptions.exception_handler',
             }
 
@@ -318,6 +317,7 @@
         一个可配置的密码哈希系统
         用户登录或内容显示的表单和视图
         一个可插拔的后台系统
+
     Django默认提供的认证系统中，用户的认证机制依赖Session机制，我们在本项目中将引入JWT认证机制，将用户的身份凭据存放在Token中，
     然后对接Django的认证系统，帮助我们来实现：
         用户的数据模型
@@ -436,6 +436,7 @@
         redis pipeline的使用
         检查是否在60s内有发送记录
         Celery异步发送短信
+
     2. 后端接口设计：
         2.1访问方式： GET /sms_codes/(?P<mobile>1[3-9]\d{9})/
 
@@ -450,7 +451,7 @@
 
         2.4视图原型：
 
-         url('^sms_codes/(?P<mobile>1[3-9]\d{9})/$', views.SMSCodeView.as_view()),
+        # 注意在users的urls.py中添加路径:url('^sms_codes/(?P<mobile>1[3-9]\d{9})/$', views.SMSCodeView.as_view()),
         class SMSCodeView(APIView):
             """
             发送短信验证码
@@ -461,34 +462,34 @@
 
     3. 后端实现
         在verifications/views.py中定义实现视图：
-	    from . import constants
+	from . import constants
         class SMSCodeView(APIView):
             """发送短信验证码"""
 
             def get(self, request, mobile):
 
-                 创建连接到redis的对象
+                # 创建连接到redis的对象
                 redis_conn = get_redis_connection('verify_codes')
 
-                 60秒内不允许重发发送短信
+                # 60秒内不允许重发发送短信
                 send_flag = redis_conn.get('send_flag_%s' % mobile)
                 if send_flag:
                     return Response({"message": "发送短信过于频繁"}, status=status.HTTP_400_BAD_REQUEST)
 
-                 生成和发送短信验证码
+                # 生成和发送短信验证码,constants是模型类中的
                 sms_code = '%06d' % random.randint(0,999999)
                 logger.debug(sms_code)
 
                 CCP().send_template_sms(mobile,[sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60], constants.SEND_SMS_TEMPLATE_ID)
 
-                 以下代码演示redis管道pipeline的使用
+                # 以下代码演示redis管道pipeline的使用
                 pl = redis_conn.pipeline()
                 pl.setex("sms_%s" % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
                 pl.setex('send_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, 1)
-                 执行
+                # 执行
                 pl.execute()
 
-                 响应发送短信验证码结果
+                # 响应发送短信验证码结果
                 return Response({"message": "OK"})
     4. 设置域名
         4.1我们现在为前端和后端分别设置两个不同的域名
@@ -517,10 +518,15 @@
 
 
   2.4. 跨域CORS
+    用访问百度的session去访问阿里,这样可以吗?这就叫跨域.明显是不能的,在这里我们用前端地址www.meiduo.site:8080去访问后端api.meiduo.site:8000
+    可以吗.同样的道理,这是不可以的.那么如何解决跨域问题呢.下面将会一步说明.
+
+    bug:由于线上部署了这个网站,所以在访问前端服务器时,要记得断网,不然就访问线上部署的了.
+
     1.我们为前端和后端分别设置了两个不同的域名
     位置	        域名
     前端  	www.meiduo.site
-    后端	a   pi.meiduo.site
+    后端	    api.meiduo.site
 
     2.现在，前端与后端分处不同的域名，我们需要为后端添加跨域访问的支持。
         我们使用CORS来解决后端对跨域访问的支持。
@@ -631,7 +637,7 @@
         请求方式： GET usernames/(?P<username>\w{5,20})/count/
         请求参数： 路径参数
         参数	        类型	    是否必传	    说明
-        username	str	        是	    用户名
+        username	str	     是	       用户名
 
 
         返回数据：JSON
@@ -766,6 +772,7 @@
                 username, password, password2, sms_code, mobile, allow
             """
             pass
+
     2. 后端实现
         在users/serializers.py中创建序列化器对象
 
@@ -1103,6 +1110,7 @@
                     }
                 })
 
+
 2.10. 账号登录
     1. 业务说明
         验证用户名和密码，验证成功后，为用户签发JWT，前端将签发的JWT保存下来。
@@ -1113,8 +1121,8 @@
         请求参数： JSON 或 表单
 
         参数名	    类型	    是否必须	    说明
-        username	str	    是	        用户名
-        password	str	    是   	    密码
+        username	str	      是	       用户名
+        password	str	      是   	    密码
 
 
         返回数据： JSON
@@ -1125,9 +1133,9 @@
         }
 
         返回值	        类型	    是否必须	    说明
-        username	    str	    是	        用户名
-        user_id	        int	    是	        用户id
-        token	        str	    是	        身份认证凭据
+        username	    str	      是	        用户名
+        user_id	        int	      是	        用户id
+        token	        str	      是	        身份认证凭据
 
 
     3. 后端实现

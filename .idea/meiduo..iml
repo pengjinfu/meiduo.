@@ -15,6 +15,8 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/meido" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/meido/meido/apps" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/meido/meido" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6 (Django_py3_1.11.11)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
